@@ -1,6 +1,16 @@
-@import './variables.css';
-@import './base.css';
-@import './layout.css';
-@import './components.css';
-@import './utilities.css';
-
+@import "./variables.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./components/Button/button.css";
+@import "./components/Navbar/navbar.css";
+@import "./components/Navbar/navbar-responsive.css";
+@import "./components/Hero/hero.css";
+@import "./components/Hero/hero-responsive.css";
+@import "./components/Card/card.css";
+@import "./components/Modal/modal.css";
+@import "./components/Toast/toast.css";
+@import "./components/Form/form.css";
+@import "./components/AuthPage/auth-page.css";
+@import "./components/Footer/footer.css";
+@import "./components/Tickets/tickets-login-cta.css";
+@import "./utilities.css";

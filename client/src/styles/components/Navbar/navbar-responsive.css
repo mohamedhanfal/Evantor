@@ -1,0 +1,70 @@
+/* Navbar responsive */
+
+@media (max-width: 768px) {
+  .navbar__toggle {
+    display: flex;
+  }
+
+  .navbar__login-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    margin-right: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--primary-light);
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background var(--transition),
+      transform var(--transition);
+  }
+
+  .navbar__login-mobile:hover {
+    background: var(--primary-light-strong);
+    transform: translateY(-0.5px);
+  }
+
+  .navbar__nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    padding: 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    display: none;
+    gap: 4px;
+  }
+
+  .navbar__nav.is-open {
+    display: flex;
+  }
+
+  .navbar__link--cta {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .navbar__user-wrap {
+    width: 100%;
+  }
+
+  .user-dropdown__trigger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .user-dropdown__menu {
+    left: 16px;
+    right: 16px;
+    min-width: auto;
+  }
+}
