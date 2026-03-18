@@ -1,0 +1,90 @@
+/* High-level layout & sections */
+
+.section {
+  padding: 48px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section__title {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+/* Event grid – masonry-style responsive */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .events-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tickets section */
+.tickets-grid {
+  display: grid;
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .tickets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* Footer layout */
+.footer {
+  margin-top: auto;
+  padding: 32px 24px;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+}
+
+.footer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer__links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer__links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: color var(--transition);
+}
+
+.footer__links a:hover {
+  color: var(--primary);
+}
+
+.footer__copy {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Section visibility (single-page scroll) */
+.section[id] {
+  scroll-margin-top: 80px;
+}
+
