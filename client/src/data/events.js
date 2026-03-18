@@ -7,7 +7,7 @@ export const events = [
     location: "Convention Center, Colombo",
     category: "Technology",
     price: 2500,
-    image: "../../public/images/Tech Summit 2026.jpg",
+    image: "/images/Tech Summit 2026.jpg",
     description:
       "Join industry leaders for keynotes, workshops, and networking. Topics include AI, cloud, and product design.",
     ticketTiers: [
@@ -24,7 +24,7 @@ export const events = [
     location: "Galle Face Green",
     category: "Music",
     price: 1500,
-    image: "../../public/images/Jazz Under the Stars.jpg",
+    image: "/images/Jazz Under the Stars.jpg",
     description:
       "An evening of live jazz with local and international artists. Bring a blanket and enjoy the sea breeze.",
     ticketTiers: [
@@ -40,7 +40,7 @@ export const events = [
     location: "Innovation Hub, Colombo 03",
     category: "Business",
     price: 0,
-    image: "../../public/images/Startup Pitch Night.jpg",
+    image: "/images/Startup Pitch Night.jpg",
     description:
       "Watch early-stage startups pitch to investors. Free entry with registration.",
     ticketTiers: [{ name: "Free Entry", price: 0, maxPerOrder: 2 }],
@@ -53,7 +53,7 @@ export const events = [
     location: "Viharamahadevi Park",
     category: "Wellness",
     price: 1200,
-    image: "../../public/images/Yoga & Wellness Festival.jpg",
+    image: "/images/Yoga & Wellness Festival.jpg",
     description:
       "Morning sessions of yoga, meditation, and wellness talks. All levels welcome.",
     ticketTiers: [
@@ -69,7 +69,7 @@ export const events = [
     location: "BMICH, Colombo",
     category: "Food & Drink",
     price: 2000,
-    image: "../../public/images/Food & Wine Expo.jpg",
+    image: "/images/Food & Wine Expo.jpg",
     description:
       "Taste local and international cuisines, paired with curated wines. Chef demos and live music.",
     ticketTiers: [
@@ -85,7 +85,7 @@ export const events = [
     location: "Jetwing Colombo Seven",
     category: "Design",
     price: 4000,
-    image: "../../public/images/Design Conference.jpg",
+    image: "/images/Design Conference.jpg",
     description:
       "UX, UI, and product design talks. Hands-on workshops and portfolio reviews.",
     ticketTiers: [

@@ -4,6 +4,7 @@
 @import "./components/Button/button.css";
 @import "./components/Navbar/navbar.css";
 @import "./components/Navbar/navbar-responsive.css";
+@import "./components/Form/form-controls.css";
 @import "./components/Hero/hero.css";
 @import "./components/Hero/hero-responsive.css";
 @import "./components/Card/card.css";

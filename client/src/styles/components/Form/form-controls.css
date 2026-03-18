@@ -1,0 +1,29 @@
+/* Shared form controls */
+
+.hero__input,
+.hero__select,
+.auth-form__input {
+  padding: 12px 16px;
+  font-family: var(--font-inter);
+  font-size: 0.9375rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.hero__input:focus,
+.hero__select:focus,
+.auth-form__input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  outline: none;
+}
+
+.hero__input::placeholder,
+.auth-form__input::placeholder {
+  color: var(--text-muted);
+}
