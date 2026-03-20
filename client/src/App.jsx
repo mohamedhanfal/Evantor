@@ -14,6 +14,10 @@ import MyTicketsPage from "./components/MyTicketsPage";
 import AboutPage from "./components/AboutPage";
 import PrivacyPage from "./components/PrivacyPage";
 import TermsPage from "./components/TermsPage";
+import HostDashboard from "./components/HostDashboard";
+import TeamLeadDashboard from "./components/TeamLeadDashboard";
+import AdminDashboard from "./components/AdminDashboard";
+import TicketerDashboard from "./components/TicketerDashboard";
 import api from "./utils/api";
 
 function Home({ authPageOpen, setAuthPageOpen }) {
@@ -119,15 +123,22 @@ function Home({ authPageOpen, setAuthPageOpen }) {
 
 function AppContent() {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [authPageOpen, setAuthPageOpen] = useState(false);
 
   const handleCreateEventClick = () => {
-    const el = document.getElementById("organizer");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (!user) {
+      showToast("Please log in to access the Host Dashboard.", "warning");
+      setAuthPageOpen(true);
+      return;
+    }
+    navigate("/host-dashboard");
   };
 
   const handleCreateEventRequiresLogin = () => {
     showToast("Please log in to create events.", "warning");
+    setAuthPageOpen(true);
   };
 
   return (
@@ -165,6 +176,10 @@ function AppContent() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
+        <Route path="/host-dashboard" element={<HostDashboard />} />
+        <Route path="/team-lead" element={<TeamLeadDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/ticketer" element={<TicketerDashboard />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />

@@ -40,3 +40,29 @@ exports.isAuthenticated = async (req, res, next) => {
       .json({ success: false, error: "Invalid or expired token." });
   }
 };
+
+// Authorize user roles
+exports.authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: `Role (${req.user.role}) is not allowed to access this resource.`,
+      });
+    }
+    next();
+  };
+};
+
+// Check if team lead matches sector
+exports.isTeamLeadForSector = (sector) => {
+  return (req, res, next) => {
+    if (req.user.role !== "team_lead" || req.user.serviceSector !== sector) {
+      return res.status(403).json({
+        success: false,
+        error: `Only Team Leads for ${sector} can access this resource.`,
+      });
+    }
+    next();
+  };
+};

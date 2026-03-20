@@ -24,6 +24,10 @@ app.use(
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/events", require("./routes/events"));
 app.use("/api/tickets", require("./routes/tickets"));
+app.use("/api/host", require("./routes/host"));
+app.use("/api/team-lead", require("./routes/teamLead"));
+app.use("/api/admin", require("./routes/admin"));
+app.use("/api/ticketer", require("./routes/ticketer"));
 
 // Health check
 app.get("/api/health", (req, res) => {

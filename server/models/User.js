@@ -26,8 +26,13 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["attendee", "organizer"],
-      default: "attendee",
+      enum: ["host", "admin", "team_lead", "ticketer"],
+      default: "host",
+    },
+    serviceSector: {
+      type: String,
+      enum: ["Decoration", "DJ", "Food", "Photographers", "Travels", null],
+      default: null,
     },
     isEmailVerified: {
       type: Boolean,

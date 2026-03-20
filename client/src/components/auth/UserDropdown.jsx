@@ -70,17 +70,6 @@ export default function UserDropdown({ onCloseMobile }) {
             <span className="user-dropdown__email">{user.email}</span>
           </div>
           <Link
-            to="/my-tickets"
-            className="user-dropdown__item"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              onCloseMobile?.();
-            }}
-          >
-            My Tickets
-          </Link>
-          <Link
             to="/profile"
             className="user-dropdown__item"
             role="menuitem"
@@ -91,6 +80,41 @@ export default function UserDropdown({ onCloseMobile }) {
           >
             Profile
           </Link>
+          
+          {(user.role === 'host' || user.role === 'admin') && (
+            <>
+              <Link to="/my-tickets" className="user-dropdown__item" role="menuitem" onClick={() => { setOpen(false); onCloseMobile?.(); }}>
+                My Tickets
+              </Link>
+              <Link to="/host-dashboard" className="user-dropdown__item" role="menuitem" onClick={() => { setOpen(false); onCloseMobile?.(); }}>
+                Host Dashboard
+              </Link>
+            </>
+          )}
+
+          {user.role === 'team_lead' && (
+            <Link to="/team-lead" className="user-dropdown__item" role="menuitem" onClick={() => { setOpen(false); onCloseMobile?.(); }}>
+              Team Lead Dashboard
+            </Link>
+          )}
+
+          {user.role === 'ticketer' && (
+            <Link to="/ticketer" className="user-dropdown__item" role="menuitem" onClick={() => { setOpen(false); onCloseMobile?.(); }}>
+              Ticketing Analytics
+            </Link>
+          )}
+
+          {user.role === 'admin' && (
+            <>
+              <Link to="/admin" className="user-dropdown__item" role="menuitem" onClick={() => { setOpen(false); onCloseMobile?.(); }}>
+                Admin Dashboard
+              </Link>
+              <Link to="/ticketer" className="user-dropdown__item" role="menuitem" onClick={() => { setOpen(false); onCloseMobile?.(); }}>
+                Ticketing Analytics
+              </Link>
+            </>
+          )}
+
           <button
             type="button"
             className="user-dropdown__item user-dropdown__item--danger"
