@@ -3,6 +3,7 @@
 Evantor is a full-stack event platform for discovering events, purchasing tickets, and managing organizer workflows.
 
 It includes role-based dashboards for:
+
 - Host
 - Team Lead
 - Ticketer
@@ -13,6 +14,7 @@ The app uses a React + Vite frontend and a Node.js + Express + MongoDB backend.
 ## Features
 
 ### Public and attendee features
+
 - Browse and filter events
 - Event modal with ticket tier selection
 - Checkout flow and ticket purchase
@@ -20,21 +22,25 @@ The app uses a React + Vite frontend and a Node.js + Express + MongoDB backend.
 - About, Privacy, and Terms pages
 
 ### Host dashboard
+
 - Create events (including image upload and ticket tiers)
 - Request services by sector (Decoration, DJ, Food, Photographers, Travels)
 - Track service request pipeline and budget summary
 
 ### Team Lead dashboard
+
 - View sector-based service requests
 - Schedule host meetings
 - Issue invoices and quotes
 
 ### Ticketer analytics dashboard
+
 - Ticket sales KPIs
 - Revenue and ticket charts
 - Event-level sales breakdown with sorting and row limits
 
 ### Admin dashboard
+
 - Platform KPIs and charts
 - Advanced user and role management
 - Filter/search/sort user table
@@ -44,6 +50,7 @@ The app uses a React + Vite frontend and a Node.js + Express + MongoDB backend.
 ## Tech Stack
 
 ### Frontend
+
 - React 19
 - React Router
 - Axios
@@ -52,6 +59,7 @@ The app uses a React + Vite frontend and a Node.js + Express + MongoDB backend.
 - Vite
 
 ### Backend
+
 - Node.js
 - Express
 - MongoDB + Mongoose
@@ -118,18 +126,21 @@ npm run dev
 ```
 
 App URLs:
+
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:5000/api`
 
 ## Scripts
 
 ### Frontend (`client/package.json`)
+
 - `npm run dev` - Start Vite dev server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
 ### Backend (`server/package.json`)
+
 - `npm start` - Start server with nodemon
 
 ## API Overview
@@ -137,6 +148,7 @@ App URLs:
 Base URL: `/api`
 
 ### Auth
+
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/logout`
@@ -145,12 +157,14 @@ Base URL: `/api`
 - `POST /auth/verify-email`
 
 ### Events and tickets
+
 - `GET /events`
 - `GET /events/:id`
 - `POST /tickets`
 - `GET /tickets/my-tickets`
 
 ### Role dashboards
+
 - Host: `/host/*`
 - Team Lead: `/team-lead/*`
 - Ticketer: `/ticketer/*`
@@ -162,9 +176,13 @@ Base URL: `/api`
 - Available roles: `host`, `ticketer`, `team_lead`, `admin`.
 - Team leads can be assigned a service sector.
 - Admin routes are protected and include user deletion safeguards:
-	- Cannot remove own account
-	- Cannot remove the last admin account
+  - Cannot remove own account
+  - Cannot remove the last admin account
 
 ## License
 
 This project is licensed under the license in [LICENSE](LICENSE).
+
+## My github repository link
+
+https://github.com/mohamedhanfal/Evantor.git
