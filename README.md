@@ -109,6 +109,20 @@ cd ../server
 npm install
 ```
 
+## Database Backup & Restore
+
+### Export MongoDB backup
+
+```bash
+mongodump --uri "YOUR_DB_URI" --out "backup"
+```
+
+### Restore MongoDB from backup
+
+```bash
+mongorestore --uri "YOUR_DB_URI" ".\backup-2026-03-21\evantor"
+```
+
 ## Run Locally
 
 Start backend (Terminal 1):
