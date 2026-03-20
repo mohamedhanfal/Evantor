@@ -22,6 +22,7 @@ app.use(
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/events", require("./routes/events"));
 
 // Health check
 app.get("/api/health", (req, res) => {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './contexts/ToastContext';
 import Navbar from './components/Navbar';
@@ -8,7 +8,7 @@ import EventCard from './components/EventCard';
 import EventModal from './components/EventModal';
 import TicketCard from './components/TicketCard';
 import Footer from './components/Footer';
-import { events as eventsData } from './data/events';
+import api from './utils/api';
 import { tickets as ticketsData } from './data/tickets';
 
 function AppContent() {
@@ -22,18 +22,30 @@ function AppContent() {
   const [modalEvent, setModalEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [authPageOpen, setAuthPageOpen] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
-  const filteredEvents = useMemo(() => {
-    return eventsData.filter((event) => {
-      const matchLocation =
-        !search.location ||
-        event.location.toLowerCase().includes(search.location.toLowerCase());
-      const matchDate = !search.date || event.date === search.date;
-      const matchCategory =
-        !search.category || event.category === search.category;
-      return matchLocation && matchDate && matchCategory;
-    });
+  const fetchEvents = useCallback(async () => {
+    try {
+      setEventsLoading(true);
+      const params = {};
+      if (search.location) params.location = search.location;
+      if (search.date) params.date = search.date;
+      if (search.category) params.category = search.category;
+      const { data } = await api.get('/events', { params });
+      if (data.success) {
+        setEvents(data.events);
+      }
+    } catch {
+      setEvents([]);
+    } finally {
+      setEventsLoading(false);
+    }
   }, [search]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const handleGetTickets = (event) => {
     setModalEvent(event);
@@ -85,17 +97,25 @@ function AppContent() {
           <h2 id="featured-title" className="section__title">
             Featured Events
           </h2>
-          <div className="events-grid" role="list">
-            {filteredEvents.map((event) => (
-              <div key={event.id} role="listitem">
-                <EventCard event={event} onGetTickets={handleGetTickets} />
-              </div>
-            ))}
-          </div>
-          {filteredEvents.length === 0 && (
+          {eventsLoading ? (
             <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-              No events match your search. Try different filters.
+              Loading events…
             </p>
+          ) : (
+            <>
+              <div className="events-grid" role="list">
+                {events.map((event) => (
+                  <div key={event._id} role="listitem">
+                    <EventCard event={event} onGetTickets={handleGetTickets} />
+                  </div>
+                ))}
+              </div>
+              {events.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No events match your search. Try different filters.
+                </p>
+              )}
+            </>
           )}
         </section>
 

@@ -143,7 +143,7 @@ export default function EventModal({ event, onClose, isOpen }) {
             onClick={handlePay}
             disabled={totalQty === 0}
           >
-            Pay with PayHere / WEBXPAY
+            Buy Now
           </button>
 
           <p className="modal__payment-stub">
