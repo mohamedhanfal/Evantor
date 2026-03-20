@@ -11,6 +11,9 @@ import Footer from "./components/Footer";
 import CheckoutPage from "./components/CheckoutPage";
 import ProfilePage from "./components/ProfilePage";
 import MyTicketsPage from "./components/MyTicketsPage";
+import AboutPage from "./components/AboutPage";
+import PrivacyPage from "./components/PrivacyPage";
+import TermsPage from "./components/TermsPage";
 import api from "./utils/api";
 
 function Home({ authPageOpen, setAuthPageOpen }) {
@@ -162,6 +165,9 @@ function AppContent() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
       </Routes>
 
       <Footer />

@@ -13,5 +13,6 @@
 @import "./components/Form/form.css";
 @import "./components/AuthPage/auth-page.css";
 @import "./components/Footer/footer.css";
+@import "./components/Legal/legal.css";
 @import "./components/Tickets/tickets-login-cta.css";
 @import "./utilities.css";
