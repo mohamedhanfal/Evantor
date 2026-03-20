@@ -59,7 +59,10 @@ export default function Navbar({
         onClick={goHome}
         aria-label="Evantor home"
       >
-        <h1 className="navbar__logo">Evantor</h1>
+        <img src="evantorLogo.png" alt="Evantor logo"></img>
+        <h1 class="evantor-text">
+          Evan<span class="highlight">tor</span>
+        </h1>
       </button>
 
       <nav

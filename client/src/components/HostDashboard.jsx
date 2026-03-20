@@ -17,7 +17,7 @@ export default function HostDashboard() {
   // Form states
   const [showEventForm, setShowEventForm] = useState(false);
   const [eventData, setEventData] = useState({
-    title: '', date: '', time: '', location: '', category: 'Music', price: 0, description: ''
+    title: '', date: '', time: '', location: '', category: 'Music', price: 0, description: '', image: null
   });
 
   const [showServiceForm, setShowServiceForm] = useState(false);
@@ -60,7 +60,18 @@ export default function HostDashboard() {
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/host/events', eventData);
+      const formData = new FormData();
+      Object.keys(eventData).forEach(key => {
+        if (eventData[key] !== null && eventData[key] !== '') {
+          formData.append(key, eventData[key]);
+        }
+      });
+
+      const { data } = await api.post('/host/events', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       if (data.success) {
         showToast('Event created successfully!', 'success');
         setShowEventForm(false);
@@ -96,112 +107,126 @@ export default function HostDashboard() {
   }
 
   return (
-    <main id="main" className="section" style={{ maxWidth: 1000, margin: '0 auto', minHeight: '60vh' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <h2 className="section__title" style={{ margin: 0 }}>Host Dashboard</h2>
+    <main id="main" className="dashboard-container">
+      <div className="dashboard-header">
         <div>
-          <button className="btn btn-primary" onClick={() => setShowEventForm(!showEventForm)} style={{ marginRight: 8 }}>
-            {showEventForm ? 'Cancel' : 'Create Event'}
+          <h2 className="dashboard-title">Host Dashboard</h2>
+          <p style={{ margin: '4px 0 0', color: 'var(--text-muted)' }}>Manage your events, services, and budgets.</p>
+        </div>
+        <div className="dashboard-actions">
+          <button className="btn btn-primary" onClick={() => setShowEventForm(!showEventForm)}>
+            {showEventForm ? 'Cancel Event Setup' : 'Create Event'}
           </button>
           <button className="btn btn-primary" onClick={() => setShowServiceForm(!showServiceForm)}>
-            {showServiceForm ? 'Cancel' : 'Request Service'}
+            {showServiceForm ? 'Cancel Service Request' : 'Request Service'}
           </button>
         </div>
       </div>
 
       {/* Forms Area */}
-      <div style={{ display: 'flex', gap: 24, marginBottom: 32 }}>
-        {showEventForm && (
-          <form onSubmit={handleCreateEvent} style={{ background: 'var(--surface-light)', padding: 24, borderRadius: 12, flex: 1 }}>
-            <h4>Create New Event</h4>
-            <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Title</label>
-                <input type="text" className="form-input" required value={eventData.title} onChange={e => setEventData({...eventData, title: e.target.value})} />
+      {(showEventForm || showServiceForm) && (
+        <div className="dashboard-grid" style={{ marginBottom: 32 }}>
+          {showEventForm && (
+            <form onSubmit={handleCreateEvent} className="glass-panel">
+              <h4>Create New Event</h4>
+              <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+                <div className="trendy-input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input type="text" id="ev-title" className="trendy-input" placeholder=" " required value={eventData.title} onChange={e => setEventData({...eventData, title: e.target.value})} />
+                  <label htmlFor="ev-title" className="trendy-label">Event Title</label>
+                </div>
+                <div className="trendy-input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <select className="trendy-input" required value={eventData.category} onChange={e => setEventData({...eventData, category: e.target.value})}>
+                    {["Music", "Technology", "Business", "Wellness", "Food & Drink", "Design"].map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <label className="trendy-label" style={{ top: 0, fontSize: '0.8rem', background: 'var(--bg-elevated)', color: 'var(--primary)' }}>Category</label>
+                </div>
               </div>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Category</label>
-                <select className="form-input" required value={eventData.category} onChange={e => setEventData({...eventData, category: e.target.value})}>
-                  {["Music", "Technology", "Business", "Wellness", "Food & Drink", "Design"].map(c => <option key={c} value={c}>{c}</option>)}
+              
+              <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+                <div className="trendy-input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input type="date" id="ev-date" className="trendy-input" placeholder=" " required value={eventData.date} onChange={e => setEventData({...eventData, date: e.target.value})} />
+                  <label htmlFor="ev-date" className="trendy-label" style={{ top: 0, fontSize: '0.8rem', background: 'var(--bg-elevated)', color: 'var(--primary)' }}>Date</label>
+                </div>
+                <div className="trendy-input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input type="time" id="ev-time" className="trendy-input" placeholder=" " required value={eventData.time} onChange={e => setEventData({...eventData, time: e.target.value})} />
+                  <label htmlFor="ev-time" className="trendy-label" style={{ top: 0, fontSize: '0.8rem', background: 'var(--bg-elevated)', color: 'var(--primary)' }}>Time</label>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+                <div className="trendy-input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input type="text" id="ev-location" className="trendy-input" placeholder=" " required value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} />
+                  <label htmlFor="ev-location" className="trendy-label">Location</label>
+                </div>
+                <div className="trendy-input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input type="number" id="ev-price" min="0" className="trendy-input" placeholder=" " required value={eventData.price} onChange={e => setEventData({...eventData, price: Number(e.target.value)})} />
+                  <label htmlFor="ev-price" className="trendy-label">Base Price (LKR)</label>
+                </div>
+              </div>
+
+              <div className="trendy-input-group" style={{ marginTop: 16, marginBottom: 0 }}>
+                <textarea id="ev-desc" className="trendy-input" rows="3" placeholder=" " value={eventData.description} onChange={e => setEventData({...eventData, description: e.target.value})}></textarea>
+                <label htmlFor="ev-desc" className="trendy-label">Description (Optional)</label>
+              </div>
+
+              <div className="trendy-input-group" style={{ marginTop: 16, marginBottom: 0 }}>
+                <input type="file" id="ev-image" className="trendy-input" accept="image/*" onChange={e => setEventData({...eventData, image: e.target.files[0]})} style={{ paddingTop: '20px' }} />
+                <label htmlFor="ev-image" className="trendy-label" style={{ top: 0, fontSize: '0.8rem', background: 'var(--bg-elevated)', color: 'var(--primary)' }}>Event Cover Image (Optional)</label>
+              </div>
+
+              <button type="submit" className="profile-btn" style={{ marginTop: 24, padding: '12px' }}>Create Event</button>
+            </form>
+          )}
+
+          {showServiceForm && (
+            <form onSubmit={handleRequestService} className="glass-panel" style={{ height: 'fit-content' }}>
+              <h4>Request Evantor Service</h4>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Book a professional team for your upcoming event.</p>
+              
+              <div className="trendy-input-group" style={{ marginTop: 24 }}>
+                <select className="trendy-input" required value={serviceData.eventId} onChange={e => setServiceData({...serviceData, eventId: e.target.value})}>
+                  <option value="" disabled>-- Select an Event --</option>
+                  {myEvents.map(e => <option key={e._id} value={e._id}>{e.title}</option>)}
                 </select>
+                <label className="trendy-label" style={{ top: 0, fontSize: '0.8rem', background: 'var(--bg-elevated)', color: 'var(--primary)' }}>Select Event</label>
+                {myEvents.length === 0 && <small style={{ color: 'var(--primary)', marginTop: 8, display: 'block' }}>You need to create an event first.</small>}
               </div>
-            </div>
-            <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Date</label>
-                <input type="date" className="form-input" required value={eventData.date} onChange={e => setEventData({...eventData, date: e.target.value})} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Time</label>
-                <input type="time" className="form-input" required value={eventData.time} onChange={e => setEventData({...eventData, time: e.target.value})} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Location</label>
-                <input type="text" className="form-input" required value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Base Price (LKR)</label>
-                <input type="number" min="0" className="form-input" required value={eventData.price} onChange={e => setEventData({...eventData, price: Number(e.target.value)})} />
-              </div>
-            </div>
-            <div style={{ marginTop: 16 }}>
-              <label className="form-label">Description</label>
-              <textarea className="form-input" rows="3" value={eventData.description} onChange={e => setEventData({...eventData, description: e.target.value})}></textarea>
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ marginTop: 16, width: '100%' }}>Create Event</button>
-          </form>
-        )}
 
-        {showServiceForm && (
-          <form onSubmit={handleRequestService} style={{ background: 'var(--surface-light)', padding: 24, borderRadius: 12, flex: 1 }}>
-            <h4>Request Evantor Service</h4>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Choose an event to request a service planning team.</p>
-            
-            <div style={{ marginTop: 16 }}>
-              <label className="form-label">Select Event</label>
-              <select className="form-input" required value={serviceData.eventId} onChange={e => setServiceData({...serviceData, eventId: e.target.value})}>
-                <option value="" disabled>-- Select an Event --</option>
-                {myEvents.map(e => <option key={e._id} value={e._id}>{e.title}</option>)}
-              </select>
-              {myEvents.length === 0 && <small style={{ color: 'var(--primary)' }}>You need to create an event first.</small>}
-            </div>
+              <div className="trendy-input-group" style={{ marginTop: 16 }}>
+                <select className="trendy-input" required value={serviceData.sector} onChange={e => setServiceData({...serviceData, sector: e.target.value})}>
+                  {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <label className="trendy-label" style={{ top: 0, fontSize: '0.8rem', background: 'var(--bg-elevated)', color: 'var(--primary)' }}>Service Sector</label>
+              </div>
 
-            <div style={{ marginTop: 16 }}>
-              <label className="form-label">Service Sector</label>
-              <select className="form-input" required value={serviceData.sector} onChange={e => setServiceData({...serviceData, sector: e.target.value})}>
-                {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ marginTop: 16, width: '100%' }} disabled={!serviceData.eventId}>Request Meeting</button>
-          </form>
-        )}
-      </div>
+              <button type="submit" className="profile-btn" style={{ marginTop: 16, padding: '12px' }} disabled={!serviceData.eventId}>Request Meeting</button>
+            </form>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <p style={{ textAlign: 'center' }}>Loading dashboard...</p>
       ) : (
-        <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+        <div className="dashboard-grid-large">
           {/* Tracking Pipeline */}
-          <div style={{ flex: '1 1 500px' }}>
-            <h3 style={{ marginBottom: 16 }}>Service Tracking Pipeline</h3>
+          <div className="glass-panel">
+            <h3>Service Tracking Pipeline</h3>
             {serviceRequests.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No active service requests.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {serviceRequests.map(req => (
-                  <div key={req._id} style={{ background: 'var(--surface-light)', padding: 16, borderRadius: 8, borderLeft: '4px solid var(--primary)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <strong>{req.event.title}</strong>
-                      <span style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'var(--bg)', borderRadius: 12 }}>{req.status}</span>
+                  <div key={req._id} className="dashboard-card">
+                    <div className="card-header">
+                      <h4 className="card-title">{req.event.title}</h4>
+                      <span className={`badge ${req.status === 'Completed' ? 'success' : ''}`}>{req.status}</span>
                     </div>
                     <div>
                       <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Sector: {req.sector}</span>
                     </div>
                     {req.meetingDate && (
-                      <div style={{ marginTop: 8, fontSize: '0.85rem' }}>
+                      <div style={{ marginTop: 12, fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary)' }}>
                         📅 Meeting scheduled: {new Date(req.meetingDate).toLocaleString()}
                       </div>
                     )}
@@ -212,27 +237,31 @@ export default function HostDashboard() {
           </div>
 
           {/* Budget / Invoices */}
-          <div style={{ flex: '1 1 300px' }}>
-            <h3 style={{ marginBottom: 16 }}>Budget & Invoices</h3>
+          <div className="glass-panel">
+            <h3>Budget & Invoices</h3>
             {invoices.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No invoices received yet.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {invoices.map(inv => (
-                  <div key={inv._id} style={{ background: 'var(--surface-light)', padding: 16, borderRadius: 8 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <strong>{inv.serviceRequest?.sector} Team</strong>
-                      <span style={{ color: inv.status === 'Paid' ? 'green' : 'var(--primary)', fontWeight: 'bold' }}>
+                  <div key={inv._id} className={`dashboard-card ${inv.status === 'Paid' ? 'success-border' : 'warning-border'}`}>
+                    <div className="card-header">
+                      <h4 className="card-title">{inv.serviceRequest?.sector} Team</h4>
+                      <span className={`badge ${inv.status === 'Paid' ? 'success' : ''}`}>
                         {inv.status}
                       </span>
                     </div>
-                    <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem' }}>{inv.event.title}</p>
+                    <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem' }}>Event: {inv.event.title}</p>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{inv.description}</p>
-                    <div style={{ marginTop: 12, textAlign: 'right', fontWeight: 'bold' }}>
-                      LKR {inv.amount.toLocaleString()}
+                    
+                    <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                        LKR {inv.amount.toLocaleString()}
+                      </span>
                     </div>
+                    
                     {inv.status === 'Pending' && (
-                      <button className="btn btn-primary" style={{ width: '100%', marginTop: 12, padding: '8px' }}>
+                      <button className="profile-btn" style={{ marginTop: 16, padding: '10px' }}>
                         Pay Invoice
                       </button>
                     )}

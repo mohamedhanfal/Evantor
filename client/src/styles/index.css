@@ -12,6 +12,8 @@
 @import "./components/Toast/toast.css";
 @import "./components/Form/form.css";
 @import "./components/AuthPage/auth-page.css";
+@import "./components/ProfilePage/profile-page.css";
+@import "./components/Dashboard/dashboard.css";
 @import "./components/Footer/footer.css";
 @import "./components/Legal/legal.css";
 @import "./components/Tickets/tickets-login-cta.css";

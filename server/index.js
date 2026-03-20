@@ -12,6 +12,8 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/images", express.static("resources/eventImg"));
 app.use(cookieParser());
 app.use(
   cors({

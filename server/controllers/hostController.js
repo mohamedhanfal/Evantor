@@ -2,6 +2,8 @@ const Event = require("../models/Event");
 const ServiceRequest = require("../models/ServiceRequest");
 const Invoice = require("../models/Invoice");
 const { validationResult } = require("express-validator");
+const fs = require("fs");
+const path = require("path");
 
 // POST /api/host/events — Create a new event
 exports.createEvent = async (req, res, next) => {
@@ -15,6 +17,23 @@ exports.createEvent = async (req, res, next) => {
     const eventData = { ...req.body, createdBy: req.user.id };
 
     const event = await Event.create(eventData);
+
+    if (req.file) {
+      const filename = `${event._id}.jpg`;
+      const imagePath = path.join(__dirname, "../resources/eventImg", filename);
+      
+      // Ensure directory exists just in case
+      if (!fs.existsSync(path.dirname(imagePath))) {
+        fs.mkdirSync(path.dirname(imagePath), { recursive: true });
+      }
+      
+      fs.writeFileSync(imagePath, req.file.buffer);
+      event.image = `/images/${filename}`;
+    } else {
+      // Default placeholder if none uploaded
+      event.image = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80";
+    }
+    await event.save();
 
     res.status(201).json({
       success: true,

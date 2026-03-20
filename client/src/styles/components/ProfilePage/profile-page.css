@@ -1,0 +1,135 @@
+/* profile-page.css */
+
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 60vh;
+  padding: 2rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-container::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at top right, rgba(138, 43, 226, 0.15), transparent 60%),
+              radial-gradient(circle at bottom left, rgba(0, 212, 255, 0.1), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.profile-container > * {
+  z-index: 1;
+  position: relative;
+}
+
+.profile__title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* Trendy Input Wrapper */
+.trendy-input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.trendy-input {
+  width: 100%;
+  padding: 16px 16px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.trendy-input:focus {
+  border-color: var(--primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.trendy-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  padding: 0 4px;
+}
+
+/* Floating Label Magic */
+.trendy-input:focus ~ .trendy-label,
+.trendy-input:not(:placeholder-shown) ~ .trendy-label {
+  top: 0;
+  font-size: 0.8rem;
+  color: var(--primary);
+  background: var(--bg-elevated); /* Matching theme */
+  border-radius: 4px;
+}
+
+/* Specific to the profile button */
+.profile-btn {
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.profile-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--primary-hover);
+  box-shadow: 0 6px 20px var(--primary-light-strong);
+}
+
+.profile-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Email Verification Banner */
+.verification-banner {
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ffb74d;
+  padding: 16px 20px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: inset 0 0 20px rgba(255, 152, 0, 0.05);
+  animation: pulseWarning 2s infinite alternate;
+}
+
+@keyframes pulseWarning {
+  0% { box-shadow: inset 0 0 20px rgba(255, 152, 0, 0.05); }
+  100% { box-shadow: inset 0 0 30px rgba(255, 152, 0, 0.15); }
+}

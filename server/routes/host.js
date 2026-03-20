@@ -3,6 +3,9 @@ const router = express.Router();
 const { body } = require("express-validator");
 const { createEvent, requestService, getHostDashboardData } = require("../controllers/hostController");
 const { isAuthenticated, authorizeRoles } = require("../middleware/auth");
+const multer = require("multer");
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const eventValidation = [
   body("title").notEmpty().withMessage("Title is required"),
@@ -21,7 +24,7 @@ const serviceValidation = [
 // All routes here require the user to be a "host" or "admin"
 router.use(isAuthenticated, authorizeRoles("host", "admin"));
 
-router.post("/events", eventValidation, createEvent);
+router.post("/events", upload.single("image"), eventValidation, createEvent);
 router.post("/services/request", serviceValidation, requestService);
 router.get("/dashboard", getHostDashboardData);
 

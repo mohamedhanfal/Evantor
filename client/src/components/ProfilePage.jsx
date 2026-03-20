@@ -69,60 +69,94 @@ export default function ProfilePage() {
   };
 
   return (
-    <main id="main" className="section" style={{ maxWidth: 600, margin: '0 auto', minHeight: '60vh' }}>
-      <h2 className="section__title">User Profile</h2>
+    <main id="main" className="section" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center' }}>
+      <div className="profile-container">
+        <h2 className="profile__title">User Profile</h2>
 
-      {!user.isEmailVerified && (
-        <div style={{ background: 'rgba(255, 152, 0, 0.1)', border: '1px solid #ff9800', color: '#ff9800', padding: 16, borderRadius: 8, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <strong>Email Not Verified</strong>
-            <p style={{ margin: 0, fontSize: '0.9rem' }}>Please verify your email address to secure your account.</p>
+        {!user.isEmailVerified && (
+          <div className="verification-banner">
+            <div>
+              <strong style={{ display: 'block', fontSize: '1.1rem' }}>Email Not Verified</strong>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', opacity: 0.9 }}>Please verify your email address to secure your account.</p>
+            </div>
+            <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.9rem', borderRadius: 8, whiteSpace: 'nowrap' }} onClick={() => setShowVerifyModal(true)}>
+              Verify Email
+            </button>
           </div>
-          <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={() => setShowVerifyModal(true)}>
-            Verify Email
-          </button>
-        </div>
-      )}
+        )}
 
-      {showVerifyModal && (
-        <div style={{ background: 'var(--surface-light)', padding: 24, borderRadius: 12, marginBottom: 24 }}>
-          <h4>Verify Email</h4>
-          {demoToken && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              (Demo: Simulation of email. Use token: <strong>{demoToken}</strong>)
-            </p>
-          )}
-          <form onSubmit={handleVerify} style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        {showVerifyModal && (
+          <div style={{ background: 'var(--bg)', padding: 24, borderRadius: 16, border: '1px solid var(--border)' }}>
+            <h4 style={{ marginBottom: 8, color: 'var(--text)' }}>Verify Email</h4>
+            {demoToken && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                (Demo: Simulation of email. Use token: <strong>{demoToken}</strong>)
+              </p>
+            )}
+            <form onSubmit={handleVerify} style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              <input 
+                type="text" 
+                placeholder="Paste verification token here" 
+                className="trendy-input" 
+                style={{ padding: '12px 16px' }}
+                value={tokenInput} 
+                onChange={(e) => setTokenInput(e.target.value)} 
+                required 
+              />
+              <button type="submit" className="profile-btn" style={{ width: 'auto', padding: '0 24px' }}>Verify</button>
+            </form>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          
+          <div className="trendy-input-group">
             <input 
+              className="trendy-input" 
+              id="name" 
+              name="name" 
               type="text" 
-              placeholder="Paste verification token here" 
-              className="form-input" 
-              value={tokenInput} 
-              onChange={(e) => setTokenInput(e.target.value)} 
+              placeholder=" "
+              value={formData.name} 
+              onChange={handleChange} 
               required 
             />
-            <button type="submit" className="btn btn-primary">Verify</button>
-          </form>
-        </div>
-      )}
+            <label className="trendy-label" htmlFor="name">Full Name</label>
+          </div>
 
-      <form onSubmit={handleSubmit} style={{ background: 'var(--surface-light)', padding: 24, borderRadius: 12 }}>
-        <div style={{ marginBottom: 16 }}>
-          <label className="form-label" htmlFor="name">Full Name</label>
-          <input className="form-input" id="name" name="name" type="text" value={formData.name} onChange={handleChange} required />
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <label className="form-label" htmlFor="email">Email Address</label>
-          <input className="form-input" id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
-        </div>
-        <div style={{ marginBottom: 24 }}>
-          <label className="form-label" htmlFor="password">New Password (leave blank to keep current)</label>
-          <input className="form-input" id="password" name="password" type="password" value={formData.password} onChange={handleChange} minLength={8} />
-        </div>
-        <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-          {loading ? 'Saving...' : 'Save Changes'}
-        </button>
-      </form>
+          <div className="trendy-input-group">
+            <input 
+              className="trendy-input" 
+              id="email" 
+              name="email" 
+              type="email" 
+              placeholder=" "
+              value={formData.email} 
+              onChange={handleChange} 
+              required 
+            />
+            <label className="trendy-label" htmlFor="email">Email Address</label>
+          </div>
+
+          <div className="trendy-input-group">
+            <input 
+              className="trendy-input" 
+              id="password" 
+              name="password" 
+              type="password" 
+              placeholder=" "
+              value={formData.password} 
+              onChange={handleChange} 
+              minLength={8} 
+            />
+            <label className="trendy-label" htmlFor="password">New Password (leave blank to keep current)</label>
+          </div>
+
+          <button type="submit" className="profile-btn" disabled={loading}>
+            {loading ? 'Saving Changes...' : 'Save Changes'}
+          </button>
+        </form>
+      </div>
     </main>
   );
 }
