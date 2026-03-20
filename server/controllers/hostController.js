@@ -13,8 +13,24 @@ exports.createEvent = async (req, res, next) => {
       return res.status(400).json({ success: false, error: errors.array()[0].msg });
     }
 
+    let parsedTiers = [];
+    if (req.body.ticketTiers) {
+      try {
+        parsedTiers = JSON.parse(req.body.ticketTiers);
+      } catch (e) {
+        return res.status(400).json({ success: false, error: "Invalid ticket tiers format." });
+      }
+    }
+
+    const isPrivate = req.body.isPrivate === 'true' || req.body.isPrivate === true;
+
     // Assign logged-in user as the event creator/host
-    const eventData = { ...req.body, createdBy: req.user.id };
+    const eventData = { 
+      ...req.body, 
+      createdBy: req.user.id,
+      ticketTiers: parsedTiers,
+      isPrivate
+    };
 
     const event = await Event.create(eventData);
 
@@ -80,21 +96,58 @@ exports.requestService = async (req, res, next) => {
 // GET /api/host/dashboard — Get host's events, active service requests, and invoices
 exports.getHostDashboardData = async (req, res, next) => {
   try {
-    // Currently, we don't strictly tie Events to Hosts via a createdBy field in Event model,
-    // but the user wants to "plan their event". Let's fetch service requests tied to this host.
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    // Fetch Events Created by this Host
+    const events = await Event.find({ createdBy: req.user.id }).sort({ date: 1 });
     
-    // We fetch all ServiceRequests the host made
+    const upcomingEvents = [];
+    const expiredEvents = [];
+    
+    events.forEach(event => {
+      if (event.date >= currentDate) {
+        upcomingEvents.push(event);
+      } else {
+        expiredEvents.push(event);
+      }
+    });
+
+    // Fetch all ServiceRequests the host made
     const serviceRequests = await ServiceRequest.find({ host: req.user.id }).populate('event', 'title date');
     
     // Fetch all Invoices for this host
     const invoices = await Invoice.find({ host: req.user.id })
       .populate('serviceRequest', 'sector status')
-      .populate('event', 'title');
+      .populate('event', 'title date');
+
+    // Summarize budget per event
+    const budgetSummary = {};
+    invoices.forEach(inv => {
+      const eventId = inv.event._id.toString();
+      if (!budgetSummary[eventId]) {
+        budgetSummary[eventId] = {
+          eventTitle: inv.event.title,
+          totalBudget: 0,
+          totalPaid: 0,
+          totalPending: 0,
+          invoices: []
+        };
+      }
+      
+      budgetSummary[eventId].totalBudget += inv.amount;
+      if (inv.status === 'Paid') budgetSummary[eventId].totalPaid += inv.amount;
+      else budgetSummary[eventId].totalPending += inv.amount;
+      
+      budgetSummary[eventId].invoices.push(inv);
+    });
 
     res.status(200).json({
       success: true,
+      upcomingEvents,
+      expiredEvents,
       serviceRequests,
       invoices,
+      budgetSummary: Object.values(budgetSummary)
     });
   } catch (err) {
     next(err);
