@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
-import api from '../utils/api';
+import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import api from "../utils/api";
 
 export default function TeamLeadDashboard() {
   const { user } = useAuth();
   const { showToast } = useToast();
-  
+
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -16,44 +16,53 @@ export default function TeamLeadDashboard() {
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [activeRequest, setActiveRequest] = useState(null);
 
-  const [meetingDate, setMeetingDate] = useState('');
-  const [invoiceData, setInvoiceData] = useState({ amount: '', description: '' });
+  const [meetingDate, setMeetingDate] = useState("");
+  const [invoiceData, setInvoiceData] = useState({
+    amount: "",
+    description: "",
+  });
 
   const fetchTeamLeadData = async () => {
     try {
-      const { data } = await api.get('/team-lead/requests');
+      const { data } = await api.get("/team-lead/requests");
       if (data.success) {
         setRequests(data.requests);
         setInvoices(data.invoices);
       }
     } catch (err) {
-      showToast('Failed to load team lead data.', 'error');
+      showToast("Failed to load team lead data.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user && (user.role === 'team_lead' || user.role === 'admin')) {
+    if (user && (user.role === "team_lead" || user.role === "admin")) {
       fetchTeamLeadData();
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, showToast]);
 
   const handleScheduleMeeting = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await api.put(`/team-lead/requests/${activeRequest._id}/schedule`, { meetingDate });
+      const { data } = await api.put(
+        `/team-lead/requests/${activeRequest._id}/schedule`,
+        { meetingDate },
+      );
       if (data.success) {
-        showToast('Meeting scheduled successfully!', 'success');
+        showToast("Meeting scheduled successfully!", "success");
         setScheduleModalOpen(false);
         setActiveRequest(null);
-        setMeetingDate('');
+        setMeetingDate("");
         fetchTeamLeadData();
       }
     } catch (err) {
-      showToast(err.response?.data?.error || 'Failed to schedule meeting.', 'error');
+      showToast(
+        err.response?.data?.error || "Failed to schedule meeting.",
+        "error",
+      );
     }
   };
 
@@ -65,22 +74,29 @@ export default function TeamLeadDashboard() {
         amount: Number(invoiceData.amount),
         description: invoiceData.description,
       };
-      const { data } = await api.post('/team-lead/invoices', payload);
+      const { data } = await api.post("/team-lead/invoices", payload);
       if (data.success) {
-        showToast('Invoice issued successfully!', 'success');
+        showToast("Invoice issued successfully!", "success");
         setInvoiceModalOpen(false);
         setActiveRequest(null);
-        setInvoiceData({ amount: '', description: '' });
+        setInvoiceData({ amount: "", description: "" });
         fetchTeamLeadData();
       }
     } catch (err) {
-      showToast(err.response?.data?.error || 'Failed to issue invoice.', 'error');
+      showToast(
+        err.response?.data?.error || "Failed to issue invoice.",
+        "error",
+      );
     }
   };
 
-  if (!user || user.role !== 'team_lead') {
+  if (!user || user.role !== "team_lead") {
     return (
-      <main id="main" className="section" style={{ minHeight: '60vh', textAlign: 'center' }}>
+      <main
+        id="main"
+        className="section"
+        style={{ minHeight: "60vh", textAlign: "center" }}
+      >
         <h2>Access Denied</h2>
         <p>Only Team Leads can access this dashboard.</p>
       </main>
@@ -88,110 +104,170 @@ export default function TeamLeadDashboard() {
   }
 
   return (
-    <main id="main" className="section" style={{ maxWidth: 1000, margin: '0 auto', minHeight: '60vh' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+    <main id="main" className="dashboard-container teamlead-dashboard">
+      <div className="dashboard-header">
         <div>
-          <h2 className="section__title" style={{ margin: 0 }}>Team Lead Dashboard</h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)' }}>Managing {user.serviceSector} Sector</p>
+          <h2 className="dashboard-title">Team Lead Dashboard</h2>
+          <p className="teamlead-dashboard__subtitle">
+            Managing {user.serviceSector} sector
+          </p>
         </div>
       </div>
 
       {loading ? (
-        <p style={{ textAlign: 'center' }}>Loading dashboard...</p>
+        <p style={{ textAlign: "center" }}>Loading dashboard...</p>
       ) : (
-        <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+        <div className="teamlead-dashboard__layout">
           {/* Active Requests */}
-          <div style={{ flex: '2 1 500px' }}>
-            <h3 style={{ marginBottom: 16 }}>Pending Requests</h3>
+          <section className="glass-panel teamlead-dashboard__panel">
+            <h3>Pending Requests</h3>
             {requests.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No active service requests in your sector.</p>
+              <p className="teamlead-dashboard__empty">
+                No active service requests in your sector.
+              </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {requests.map(req => (
-                  <div key={req._id} style={{ background: 'var(--surface-light)', padding: 20, borderRadius: 8, borderLeft: '4px solid var(--primary)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <h4 style={{ margin: 0 }}>{req.event.title}</h4>
-                      <span style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'var(--bg)', borderRadius: 12 }}>{req.status}</span>
+              <div className="teamlead-dashboard__request-list">
+                {requests.map((req) => (
+                  <article
+                    key={req._id}
+                    className="dashboard-card teamlead-request-card"
+                  >
+                    <div className="card-header">
+                      <h4 className="card-title">{req.event.title}</h4>
+                      <span
+                        className={`badge ${req.status === "Completed" ? "success" : ""}`}
+                      >
+                        {req.status}
+                      </span>
                     </div>
-                    <div style={{ display: 'flex', gap: 32, fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+
+                    <div className="teamlead-request-card__meta">
                       <div>Host: {req.host.name}</div>
-                      <div>Event Date: {new Date(req.event.date).toLocaleDateString()}</div>
-                    </div>
-                    
-                    {req.meetingDate && (
-                      <div style={{ marginBottom: 16, fontSize: '0.9rem', color: 'var(--primary)' }}>
-                        <strong>📅 Scheduled Meeting:</strong> {new Date(req.meetingDate).toLocaleString()}
+                      <div>
+                        Event Date:{" "}
+                        {new Date(req.event.date).toLocaleDateString()}
                       </div>
+                    </div>
+
+                    {req.meetingDate && (
+                      <p className="teamlead-request-card__meeting">
+                        <strong>Scheduled Meeting:</strong>{" "}
+                        {new Date(req.meetingDate).toLocaleString()}
+                      </p>
                     )}
 
-                    <div style={{ display: 'flex', gap: 12 }}>
-                      {req.status === 'Requested' && (
-                        <button 
-                          className="btn btn-primary" 
-                          style={{ padding: '6px 16px', fontSize: '0.9rem' }}
-                          onClick={() => { setActiveRequest(req); setScheduleModalOpen(true); }}
+                    <div className="teamlead-request-card__actions">
+                      {req.status === "Requested" && (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => {
+                            setActiveRequest(req);
+                            setScheduleModalOpen(true);
+                          }}
                         >
                           Schedule Meeting
                         </button>
                       )}
-                      {req.status === 'Meeting Scheduled' && (
-                        <button 
-                          className="btn btn-primary" 
-                          style={{ padding: '6px 16px', fontSize: '0.9rem' }}
-                          onClick={() => { setTimeout(() => setActiveRequest(req), 0); setInvoiceModalOpen(true); }}
+                      {req.status === "Meeting Scheduled" && (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => {
+                            setActiveRequest(req);
+                            setInvoiceModalOpen(true);
+                          }}
                         >
                           Issue Invoice & Quote
                         </button>
                       )}
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
-          </div>
+          </section>
 
           {/* Issued Invoices */}
-          <div style={{ flex: '1 1 300px' }}>
-            <h3 style={{ marginBottom: 16 }}>Issued Invoices</h3>
+          <aside className="glass-panel teamlead-dashboard__panel">
+            <h3>Issued Invoices</h3>
             {invoices.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No invoices issued yet.</p>
+              <p className="teamlead-dashboard__empty">
+                No invoices issued yet.
+              </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {invoices.map(inv => (
-                  <div key={inv._id} style={{ background: 'var(--surface-light)', padding: 16, borderRadius: 8 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <strong>{inv.event.title}</strong>
-                      <span style={{ color: inv.status === 'Paid' ? 'green' : 'var(--primary)', fontWeight: 'bold' }}>
+              <div className="teamlead-dashboard__invoice-list">
+                {invoices.map((inv) => (
+                  <article
+                    key={inv._id}
+                    className="dashboard-card teamlead-invoice-card"
+                  >
+                    <div className="card-header">
+                      <h4 className="card-title">{inv.event.title}</h4>
+                      <span
+                        className={`badge ${inv.status === "Paid" ? "success" : ""}`}
+                      >
                         {inv.status}
                       </span>
                     </div>
-                    <p style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{inv.description}</p>
-                    <div style={{ textAlign: 'right', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                    <p className="teamlead-invoice-card__description">
+                      {inv.description}
+                    </p>
+                    <div className="teamlead-invoice-card__amount">
                       LKR {inv.amount.toLocaleString()}
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
-          </div>
+          </aside>
         </div>
       )}
 
       {/* Schedule Modals */}
       {scheduleModalOpen && activeRequest && (
-        <div className="modal-overlay" onClick={() => setScheduleModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+        <div
+          className="modal-overlay"
+          onClick={() => setScheduleModalOpen(false)}
+        >
+          <div
+            className="modal teamlead-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal__header">
               <h3 className="modal__title">Schedule Meeting</h3>
-              <button className="modal__close" onClick={() => setScheduleModalOpen(false)}>×</button>
+              <button
+                className="modal__close"
+                onClick={() => setScheduleModalOpen(false)}
+              >
+                ×
+              </button>
             </div>
-            <form onSubmit={handleScheduleMeeting} className="modal__body">
-              <p>Host: {activeRequest.host.name}</p>
-              <div style={{ marginTop: 16 }}>
-                <label className="form-label">Meeting Date & Time</label>
-                <input type="datetime-local" className="form-input" required value={meetingDate} onChange={e => setMeetingDate(e.target.value)} />
+            <form
+              onSubmit={handleScheduleMeeting}
+              className="modal__body teamlead-modal__body"
+            >
+              <p className="teamlead-modal__hint">
+                Host: {activeRequest.host.name}
+              </p>
+              <div className="trendy-input-group">
+                <input
+                  id="meeting-date"
+                  type="datetime-local"
+                  className="trendy-input"
+                  placeholder=" "
+                  required
+                  value={meetingDate}
+                  onChange={(e) => setMeetingDate(e.target.value)}
+                />
+                <label htmlFor="meeting-date" className="trendy-label">
+                  Meeting Date and Time
+                </label>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 24 }}>Confirm Schedule</button>
+              <button
+                type="submit"
+                className="profile-btn teamlead-modal__submit"
+              >
+                Confirm Schedule
+              </button>
             </form>
           </div>
         </div>
@@ -199,27 +275,75 @@ export default function TeamLeadDashboard() {
 
       {/* Invoice Modal */}
       {invoiceModalOpen && activeRequest && (
-        <div className="modal-overlay" onClick={() => setInvoiceModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+        <div
+          className="modal-overlay"
+          onClick={() => setInvoiceModalOpen(false)}
+        >
+          <div
+            className="modal teamlead-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal__header">
               <h3 className="modal__title">Issue Invoice / Quote</h3>
-              <button className="modal__close" onClick={() => setInvoiceModalOpen(false)}>×</button>
+              <button
+                className="modal__close"
+                onClick={() => setInvoiceModalOpen(false)}
+              >
+                ×
+              </button>
             </div>
-            <form onSubmit={handleIssueInvoice} className="modal__body">
-              <div style={{ marginTop: 16 }}>
-                <label className="form-label">Quoted Amount (LKR)</label>
-                <input type="number" min="0" className="form-input" required value={invoiceData.amount} onChange={e => setInvoiceData({...invoiceData, amount: e.target.value})} />
+            <form
+              onSubmit={handleIssueInvoice}
+              className="modal__body teamlead-modal__body"
+            >
+              <div className="trendy-input-group">
+                <input
+                  id="quoted-amount"
+                  type="number"
+                  min="0"
+                  className="trendy-input"
+                  placeholder=" "
+                  required
+                  value={invoiceData.amount}
+                  onChange={(e) =>
+                    setInvoiceData({ ...invoiceData, amount: e.target.value })
+                  }
+                />
+                <label htmlFor="quoted-amount" className="trendy-label">
+                  Quoted Amount (LKR)
+                </label>
               </div>
-              <div style={{ marginTop: 16 }}>
-                <label className="form-label">Description / Breakdown</label>
-                <textarea className="form-input" rows="4" required value={invoiceData.description} onChange={e => setInvoiceData({...invoiceData, description: e.target.value})} placeholder="e.g. DJ Setup + 4 hours play..." />
+
+              <div className="trendy-input-group">
+                <textarea
+                  id="invoice-description"
+                  className="trendy-input"
+                  rows="4"
+                  placeholder=" "
+                  required
+                  value={invoiceData.description}
+                  onChange={(e) =>
+                    setInvoiceData({
+                      ...invoiceData,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <label htmlFor="invoice-description" className="trendy-label">
+                  Description / Breakdown
+                </label>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 24 }}>Send Invoice</button>
+
+              <button
+                type="submit"
+                className="profile-btn teamlead-modal__submit"
+              >
+                Send Invoice
+              </button>
             </form>
           </div>
         </div>
       )}
-
     </main>
   );
 }

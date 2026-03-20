@@ -1,41 +1,97 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
-import api from '../utils/api';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import api from "../utils/api";
+
+const formatCurrency = (value) => `LKR ${Number(value || 0).toLocaleString()}`;
 
 export default function TicketerDashboard() {
   const { user } = useAuth();
   const { showToast } = useToast();
-  
+
   const [loading, setLoading] = useState(true);
-  const [globalStats, setGlobalStats] = useState({ totalTicketsSold: 0, totalRevenue: 0 });
+  const [globalStats, setGlobalStats] = useState({
+    totalTicketsSold: 0,
+    totalRevenue: 0,
+  });
   const [eventBreakdown, setEventBreakdown] = useState([]);
+  const [sortBy, setSortBy] = useState("revenue");
+  const [rowsToShow, setRowsToShow] = useState("8");
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await api.get('/ticketer/stats');
+        const { data } = await api.get("/ticketer/stats");
         if (data.success) {
           setGlobalStats(data.stats);
           setEventBreakdown(data.eventBreakdown);
         }
       } catch (err) {
-        showToast('Failed to load ticketer analytics.', 'error');
+        showToast("Failed to load ticketer analytics.", "error");
       } finally {
         setLoading(false);
       }
     };
 
-    if (user && (user.role === 'ticketer' || user.role === 'admin')) {
+    if (user && (user.role === "ticketer" || user.role === "admin")) {
       fetchStats();
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, showToast]);
 
-  if (!user || (user.role !== 'ticketer' && user.role !== 'admin')) {
+  const sortedBreakdown = useMemo(() => {
+    const rows = [...eventBreakdown];
+    rows.sort((a, b) => {
+      if (sortBy === "tickets") return b.ticketsSold - a.ticketsSold;
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      return b.revenue - a.revenue;
+    });
+    return rows;
+  }, [eventBreakdown, sortBy]);
+
+  const visibleBreakdown = useMemo(
+    () => sortedBreakdown.slice(0, Number(rowsToShow)),
+    [sortedBreakdown, rowsToShow],
+  );
+
+  const chartData = useMemo(
+    () =>
+      visibleBreakdown.map((event, index) => ({
+        rank: index + 1,
+        shortTitle:
+          event.title.length > 18
+            ? `${event.title.slice(0, 18)}...`
+            : event.title,
+        ticketsSold: event.ticketsSold,
+        revenue: event.revenue,
+      })),
+    [visibleBreakdown],
+  );
+
+  const averageTicketValue =
+    globalStats.totalTicketsSold > 0
+      ? globalStats.totalRevenue / globalStats.totalTicketsSold
+      : 0;
+
+  const topEvent = sortedBreakdown[0];
+
+  if (!user || (user.role !== "ticketer" && user.role !== "admin")) {
     return (
-      <main className="section" style={{ minHeight: '60vh', textAlign: 'center' }}>
+      <main
+        id="main"
+        className="section"
+        style={{ minHeight: "60vh", textAlign: "center" }}
+      >
         <h2>Access Denied</h2>
         <p>Only Ticketers or Admins can access this dashboard.</p>
       </main>
@@ -43,53 +99,168 @@ export default function TicketerDashboard() {
   }
 
   return (
-    <main id="main" className="section" style={{ maxWidth: 1000, margin: '0 auto', minHeight: '60vh' }}>
-      <h2 className="section__title" style={{ marginBottom: 32 }}>Ticketer Analytics</h2>
+    <main id="main" className="dashboard-container ticketer-dashboard">
+      <header className="dashboard-header">
+        <div>
+          <h2 className="dashboard-title">Ticketing Analytics</h2>
+          <p className="ticketer-dashboard__subtitle">
+            Sales intelligence, revenue tracking, and event-level performance.
+          </p>
+        </div>
+      </header>
 
       {loading ? (
-        <p style={{ textAlign: 'center' }}>Loading analytics...</p>
+        <p style={{ textAlign: "center" }}>Loading analytics...</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-          
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, background: 'var(--surface-light)', padding: 32, borderRadius: 12, textAlign: 'center', borderLeft: '4px solid var(--primary)' }}>
-              <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>{globalStats.totalTicketsSold}</div>
-              <div style={{ color: 'var(--text-muted)' }}>Total Tickets Sold</div>
-            </div>
-            <div style={{ flex: 1, background: 'var(--surface-light)', padding: 32, borderRadius: 12, textAlign: 'center', borderLeft: '4px solid green' }}>
-              <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>LKR {globalStats.totalRevenue.toLocaleString()}</div>
-              <div style={{ color: 'var(--text-muted)' }}>Total Ticket Revenue</div>
-            </div>
-          </div>
+        <>
+          <section
+            className="ticketer-kpi-grid"
+            aria-label="Ticketing KPI metrics"
+          >
+            <article className="glass-panel ticketer-kpi-card">
+              <p>Total Tickets Sold</p>
+              <strong>{globalStats.totalTicketsSold}</strong>
+            </article>
 
-          <div>
-            <h3 style={{ marginBottom: 16 }}>Sales by Event</h3>
-            {eventBreakdown.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>No tickets sold yet.</p>
+            <article className="glass-panel ticketer-kpi-card">
+              <p>Total Revenue</p>
+              <strong>{formatCurrency(globalStats.totalRevenue)}</strong>
+            </article>
+
+            <article className="glass-panel ticketer-kpi-card">
+              <p>Average Ticket Value</p>
+              <strong>{formatCurrency(averageTicketValue)}</strong>
+            </article>
+
+            <article className="glass-panel ticketer-kpi-card">
+              <p>Top Selling Event</p>
+              <strong>{topEvent ? topEvent.title : "N/A"}</strong>
+            </article>
+          </section>
+
+          <section
+            className="ticketer-chart-grid"
+            aria-label="Ticketing charts"
+          >
+            <article className="glass-panel ticketer-chart-card">
+              <h3>Revenue by Event</h3>
+              <div className="ticketer-chart-card__canvas">
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="var(--border)"
+                    />
+                    <XAxis dataKey="shortTitle" stroke="var(--text-muted)" />
+                    <YAxis
+                      stroke="var(--text-muted)"
+                      tickFormatter={(value) => `${Math.round(value / 1000)}k`}
+                    />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Bar
+                      dataKey="revenue"
+                      fill="var(--primary)"
+                      radius={[8, 8, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </article>
+
+            <article className="glass-panel ticketer-chart-card">
+              <h3>Tickets Sold by Event</h3>
+              <div className="ticketer-chart-card__canvas">
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="var(--border)"
+                    />
+                    <XAxis dataKey="shortTitle" stroke="var(--text-muted)" />
+                    <YAxis stroke="var(--text-muted)" />
+                    <Tooltip formatter={(value) => [value, "Tickets"]} />
+                    <Bar
+                      dataKey="ticketsSold"
+                      fill="#16a34a"
+                      radius={[8, 8, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </article>
+          </section>
+
+          <section
+            className="glass-panel ticketer-breakdown"
+            aria-labelledby="ticketer-breakdown-title"
+          >
+            <div className="ticketer-breakdown__header">
+              <h3 id="ticketer-breakdown-title">Sales Breakdown by Event</h3>
+              <p>
+                Showing {visibleBreakdown.length} of {sortedBreakdown.length}{" "}
+                events with ticket sales
+              </p>
+            </div>
+
+            <div className="ticketer-breakdown__controls">
+              <select
+                className="form-input"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="revenue">Sort by revenue</option>
+                <option value="tickets">Sort by tickets sold</option>
+                <option value="title">Sort by event title</option>
+              </select>
+
+              <select
+                className="form-input"
+                value={rowsToShow}
+                onChange={(e) => setRowsToShow(e.target.value)}
+              >
+                <option value="5">Show top 5</option>
+                <option value="8">Show top 8</option>
+                <option value="12">Show top 12</option>
+                <option value="20">Show top 20</option>
+              </select>
+            </div>
+
+            {sortedBreakdown.length === 0 ? (
+              <p className="ticketer-breakdown__empty">No tickets sold yet.</p>
             ) : (
-              <div style={{ background: 'var(--surface-light)', borderRadius: 12, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <div className="ticketer-breakdown__table-wrap">
+                <table className="ticketer-breakdown__table">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                      <th style={{ padding: 16 }}>Event Title</th>
-                      <th style={{ padding: 16, textAlign: 'right' }}>Tickets Sold</th>
-                      <th style={{ padding: 16, textAlign: 'right' }}>Revenue (LKR)</th>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Event</th>
+                      <th>Tickets Sold</th>
+                      <th>Revenue</th>
+                      <th>Avg / Ticket</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {eventBreakdown.map((e, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <td style={{ padding: 16 }}><strong>{e.title}</strong></td>
-                        <td style={{ padding: 16, textAlign: 'right' }}>{e.ticketsSold}</td>
-                        <td style={{ padding: 16, textAlign: 'right', color: 'green', fontWeight: 'bold' }}>{e.revenue.toLocaleString()}</td>
+                    {visibleBreakdown.map((event, index) => (
+                      <tr key={`${event.title}-${index}`}>
+                        <td>#{index + 1}</td>
+                        <td>{event.title}</td>
+                        <td>{event.ticketsSold}</td>
+                        <td>{formatCurrency(event.revenue)}</td>
+                        <td>
+                          {formatCurrency(
+                            event.ticketsSold > 0
+                              ? event.revenue / event.ticketsSold
+                              : 0,
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </div>
-        </div>
+          </section>
+        </>
       )}
     </main>
   );
