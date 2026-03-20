@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema(
       enum: ["attendee", "organizer"],
       default: "attendee",
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: String,
   },
   { timestamps: true }
 );

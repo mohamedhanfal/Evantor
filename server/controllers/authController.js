@@ -17,6 +17,7 @@ const sendToken = (user, statusCode, res) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    isEmailVerified: user.isEmailVerified,
   };
 
   res
@@ -113,6 +114,94 @@ exports.getMe = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PUT /api/auth/profile — Update user profile
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    const user = await User.findById(req.user.id).select("+password");
+
+    let emailChanged = false;
+    let verificationTokenSent = null;
+
+    if (name) user.name = name;
+    if (password) user.password = password;
+
+    if (email && email.toLowerCase() !== user.email) {
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Email is already in use." });
+      }
+      user.email = email.toLowerCase();
+      user.isEmailVerified = false;
+      user.emailVerificationToken = require("crypto").randomBytes(20).toString("hex");
+      emailChanged = true;
+      verificationTokenSent = user.emailVerificationToken; // In a real app, this would be strictly emailed, not returned.
+    }
+
+    await user.save(); // triggers pre-save hook for password
+
+    res.status(200).json({
+      success: true,
+      message: emailChanged
+        ? "Profile updated. Please verify your new email."
+        : "Profile updated successfully.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+      },
+      // DEVELOPMENT ONLY: returning token in response so frontend can display it in an alert or we can manually test
+      ...(verificationTokenSent && { verificationToken: verificationTokenSent }),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/auth/verify-email — Verify email using token
+exports.verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Verification token is required." });
+    }
+
+    const user = await User.findOne({ emailVerificationToken: token });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid or expired verification token." });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (err) {

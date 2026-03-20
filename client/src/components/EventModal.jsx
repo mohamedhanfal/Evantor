@@ -1,8 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
-export default function EventModal({ event, onClose, isOpen }) {
+export default function EventModal({ event, onClose, isOpen, onAuthRequest }) {
   const [quantities, setQuantities] = useState({});
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!event) return;
@@ -15,14 +21,14 @@ export default function EventModal({ event, onClose, isOpen }) {
   }, [event]);
 
   useEffect(() => {
-    const handleEscape = (e) => e.key === 'Escape' && onClose();
+    const handleEscape = (e) => e.key === "Escape" && onClose();
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
     };
   }, [isOpen, onClose]);
 
@@ -31,7 +37,7 @@ export default function EventModal({ event, onClose, isOpen }) {
   const totalQty = Object.values(quantities).reduce((a, b) => a + b, 0);
   const totalPrice = event.ticketTiers.reduce(
     (sum, tier) => sum + (quantities[tier.name] || 0) * tier.price,
-    0
+    0,
   );
 
   const updateQty = (tierName, delta) => {
@@ -39,7 +45,10 @@ export default function EventModal({ event, onClose, isOpen }) {
     if (!tier) return;
     setQuantities((prev) => ({
       ...prev,
-      [tierName]: Math.max(0, Math.min(tier.maxPerOrder, (prev[tierName] || 0) + delta)),
+      [tierName]: Math.max(
+        0,
+        Math.min(tier.maxPerOrder, (prev[tierName] || 0) + delta),
+      ),
     }));
     setErrors((prev) => ({ ...prev, [tierName]: null }));
   };
@@ -47,19 +56,25 @@ export default function EventModal({ event, onClose, isOpen }) {
   const handlePay = (e) => {
     e.preventDefault();
     if (totalQty === 0) {
-      setErrors({ form: 'Select at least one ticket.' });
+      setErrors({ form: "Select at least one ticket." });
       return;
     }
     setErrors({});
-    // Stub: would integrate PayHere/WEBXPAY
-    alert('Payment would proceed with PayHere/WEBXPAY. This is a stub.');
+    if (!user) {
+      showToast("Please log in to purchase tickets.", "warning");
+      onClose();
+      if (onAuthRequest) onAuthRequest();
+      return;
+    }
+    onClose();
+    navigate("/checkout", { state: { event, quantities } });
   };
 
-  const formattedDate = new Date(event.date).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const formattedDate = new Date(event.date).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
   return (
@@ -87,8 +102,8 @@ export default function EventModal({ event, onClose, isOpen }) {
         <div className="modal__body">
           <p className="modal__description">{event.description}</p>
           <p className="modal__description">
-            <strong>📅</strong> {formattedDate} · <strong>🕐</strong> {event.time} ·{' '}
-            <strong>📍</strong> {event.location}
+            <strong>📅</strong> {formattedDate} · <strong>🕐</strong>{" "}
+            {event.time} · <strong>📍</strong> {event.location}
           </p>
 
           <div className="modal__tiers">
@@ -98,7 +113,7 @@ export default function EventModal({ event, onClose, isOpen }) {
                 <div>
                   <span className="tier-name">{tier.name}</span>
                   <span className="tier-price">
-                    {' '}
+                    {" "}
                     — LKR {tier.price.toLocaleString()}
                   </span>
                 </div>
@@ -131,7 +146,7 @@ export default function EventModal({ event, onClose, isOpen }) {
           </div>
 
           {errors.form && (
-            <p role="alert" style={{ color: 'var(--primary)', marginTop: 8 }}>
+            <p role="alert" style={{ color: "var(--primary)", marginTop: 8 }}>
               {errors.form}
             </p>
           )}
@@ -139,7 +154,7 @@ export default function EventModal({ event, onClose, isOpen }) {
           <button
             type="button"
             className="btn btn-primary"
-            style={{ width: '100%', marginTop: 16 }}
+            style={{ width: "100%", marginTop: 16 }}
             onClick={handlePay}
             disabled={totalQty === 0}
           >
@@ -147,7 +162,7 @@ export default function EventModal({ event, onClose, isOpen }) {
           </button>
 
           <p className="modal__payment-stub">
-            Payment powered by PayHere / WEBXPAY (stub)
+            payment safe and secure powered by <strong>Evantor</strong>
           </p>
         </div>
       </div>

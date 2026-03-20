@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
-import UserDropdown from './auth/UserDropdown';
-import { useAuth } from '../contexts/AuthContext';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import UserDropdown from "./auth/UserDropdown";
+import { useAuth } from "../contexts/AuthContext";
 
-const navLinks = [
-  { href: '#featured-events', label: 'Events' },
-  { href: '#my-tickets', label: 'My Tickets' },
-];
+const navLinks = [{ to: "/events", label: "Events" }];
 
 export default function Navbar({
   authPageOpen,
@@ -15,6 +13,7 @@ export default function Navbar({
   onCreateEventRequiresLogin,
 }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleToggleMenu = () => setMobileOpen((prev) => !prev);
@@ -36,10 +35,20 @@ export default function Navbar({
     closeMenu();
   };
 
+  const goHome = () => {
+    navigate("/");
+    closeMenu();
+  };
+
+  const goToRoute = (to) => {
+    navigate(to);
+    closeMenu();
+  };
+
   useEffect(() => {
-    const handleEscape = (e) => e.key === 'Escape' && closeMenu();
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    const handleEscape = (e) => e.key === "Escape" && closeMenu();
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
   return (
@@ -47,25 +56,22 @@ export default function Navbar({
       <button
         type="button"
         className="navbar__logo-btn"
-        onClick={() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          closeMenu();
-        }}
+        onClick={goHome}
         aria-label="Evantor home"
       >
         <h1 className="navbar__logo">Evantor</h1>
       </button>
 
       <nav
-        className={`navbar__nav ${mobileOpen ? 'is-open' : ''}`}
+        className={`navbar__nav ${mobileOpen ? "is-open" : ""}`}
         aria-label="Main navigation"
       >
         {navLinks.map((link) => (
           <a
-            key={link.href}
-            href={link.href}
+            key={link.to}
+            type="button"
             className="navbar__link"
-            onClick={closeMenu}
+            onClick={() => goToRoute(link.to)}
           >
             {link.label}
           </a>
@@ -99,7 +105,7 @@ export default function Navbar({
         onClick={handleToggleMenu}
         aria-expanded={mobileOpen}
         aria-controls="main-nav"
-        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        aria-label={mobileOpen ? "Close menu" : "Open menu"}
         id="menu-toggle"
       >
         <span className="navbar__toggle-icon" aria-hidden>

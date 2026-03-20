@@ -55,16 +55,51 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     try {
       await api.get('/auth/logout');
-    } catch {
-      // Even if the request fails, clear local state
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
     }
-    setUser(null);
-  }, []);
+  };
 
-  const value = { user, loading, login, register, logout };
+  const updateProfile = async (data) => {
+    try {
+      const response = await api.put('/auth/profile', data);
+      setUser(response.data.user);
+      return { success: true, message: response.data.message, token: response.data.verificationToken };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Profile update failed. Please try again.',
+      };
+    }
+  };
+
+  const verifyEmail = async (token) => {
+    try {
+      const response = await api.post('/auth/verify-email', { token });
+      setUser(response.data.user);
+      return { success: true, message: response.data.message };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Email verification failed.',
+      };
+    }
+  };
+
+  const value = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    updateProfile,
+    verifyEmail,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

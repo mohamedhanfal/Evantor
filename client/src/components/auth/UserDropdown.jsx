@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 function getInitials(name) {
@@ -68,8 +69,19 @@ export default function UserDropdown({ onCloseMobile }) {
             </span>
             <span className="user-dropdown__email">{user.email}</span>
           </div>
-          <a
-            href="#organizer"
+          <Link
+            to="/my-tickets"
+            className="user-dropdown__item"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              onCloseMobile?.();
+            }}
+          >
+            My Tickets
+          </Link>
+          <Link
+            to="/profile"
             className="user-dropdown__item"
             role="menuitem"
             onClick={() => {
@@ -78,7 +90,7 @@ export default function UserDropdown({ onCloseMobile }) {
             }}
           >
             Profile
-          </a>
+          </Link>
           <button
             type="button"
             className="user-dropdown__item user-dropdown__item--danger"

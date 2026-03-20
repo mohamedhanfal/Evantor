@@ -251,3 +251,7 @@
   background: var(--danger-bg-soft);
   color: var(--danger);
 }
+
+nav a {
+  cursor: pointer;
+}
